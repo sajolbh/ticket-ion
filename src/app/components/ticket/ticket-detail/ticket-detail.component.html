@@ -1,0 +1,169 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>{{ticket.title}}</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="ticket"></ion-back-button>
+      <ion-menu-button autoHide="false"></ion-menu-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content *ngIf="ticket">
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <ion-card> 
+          <ion-card-header color="primary">
+            <ion-card-title class="ion-text-center"> Ticket Details </ion-card-title>
+          </ion-card-header>  
+  
+          <ion-card-header>
+            <ion-card-title>{{ticket.title}}</ion-card-title>
+            <ion-card-subtitle>Created by {{ticket.createdBy}}</ion-card-subtitle>
+            <ion-card-subtitle> Created {{ticket.description}}</ion-card-subtitle>
+            <!-- <ion-card-subtitle>{{ticket.createdOn | timeAgo}}</ion-card-subtitle> -->
+          </ion-card-header>
+          <ion-card-content>
+            <ion-item lines="none">
+              <ion-range [(color)]="rangeColor" [(ngModel)]="rangeValue" (ionChange)="statusChange($event)" dualKnobs="false" min="0" max="30" step="10" snaps="true"></ion-range>
+            </ion-item>
+
+            <ion-chip [(color)]="rangeColor" outline class="ion-float-right">
+              <ion-label [color]="rangeColor">{{rangeLabel}}</ion-label>
+              <ion-icon [color]="rangeColor" *ngIf="rangeLabel==='Not Started'" name="alert-circle-outline"></ion-icon>
+              <ion-icon [color]="rangeColor" *ngIf="rangeLabel==='Initiated'" name="code-working-outline"></ion-icon>
+              <ion-icon  [color]="rangeColor"*ngIf="rangeLabel==='Almost Done'" name="push-outline"></ion-icon>
+              <ion-icon  [color]="rangeColor" *ngIf="rangeLabel==='Ticket resolved'" name="checkbox-outline"></ion-icon>
+            </ion-chip>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card> 
+          <ion-card-header color="primary">
+            <ion-card-title class="ion-text-center"> Ticket Developers </ion-card-title>
+  
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row >
+                <ion-col style="overflow-y: scroll; max-height: 400px;" size-lg="6" size-md="12" size-sm="12" size-xs="12">
+                  <h1 class="ion-text-center"> Present Developers</h1>
+                <ion-list>
+                  <ion-item *ngFor="let developer of developers">
+                    <ion-avatar slot="start">
+                      <img src="./assets/icon/avatars/{{developer.avatar}}.png">
+                    </ion-avatar>
+                    <ion-label>
+                      <h2>{{developer.name}}</h2>
+                      <h3>{{developer.title}}</h3>
+                      <p>{{developer.email}}</p>
+                    </ion-label>
+                    <ion-button fill="none" (click)="removeDeveloperFromTicket(developer)">
+                      <ion-icon color="primary" size="large" name="close-circle-outline"></ion-icon>
+                  </ion-button>
+                  </ion-item>
+                </ion-list>
+              </ion-col>
+
+              <ion-col style="overflow-y: scroll; max-height: 400px;" size-lg="6" size-md="12" size-sm="12" size-xs="12">
+                <h1 class="ion-text-center"> Invite Developers</h1>
+                <ion-list>
+                  <ion-item *ngFor="let developer of inviteDevelopers">
+                    <ion-avatar slot="start">
+                      <img src="./assets/icon/avatars/{{developer.avatar}}.png">
+                    </ion-avatar>
+                    <ion-label>
+                      <h2>{{developer.name}}</h2>
+                      <h3>{{developer.title}}</h3>
+                      <p>{{developer.email}}</p>
+                    </ion-label>
+                    <ion-button fill="none" (click)="addDeveloperToTicket(developer)">
+                      <ion-icon *ngIf="!isDeveloperPresent(developer)"  color="primary" size="large" name="add-circle-outline"></ion-icon>
+                  </ion-button>
+                  </ion-item>
+                </ion-list>
+              </ion-col>
+              </ion-row>
+            </ion-grid>
+            
+          </ion-card-content>
+        </ion-card>    
+      </ion-col>
+ 
+      <ion-col>
+      <ion-card> 
+        <ion-card-header color="primary">
+          <ion-card-title class="ion-text-center"> Ticket Notes </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-grid >
+            <ion-row *ngIf="notes?.length>0">
+              <ion-col size="8" offset="2" style="overflow-y: scroll; height: 500px;" size-md="12" size-sm="12" size-xs="12" offset-md="0" offset-sm="0" offset-xs="0" >
+              <ion-list lines="none">
+                <ion-item *ngFor="let note of notes">
+                  <ion-avatar slot="start" *ngIf="note.createdBy!==loggedInUser.username">
+                    <img src="./assets/icon/avatars/{{getAvatarFromNoteAuthor(note)}}.png">
+                  </ion-avatar>
+                  <ion-label *ngIf="note.createdBy!==loggedInUser.username">
+                    <h2> {{note.createdBy}}</h2>
+                    <p> {{note.createdAt | timeAgo}}</p>
+                    <h3 class="ion-text-wrap">{{note.text}}</h3>
+                  </ion-label>
+
+                  <ion-avatar slot="end" *ngIf="note.createdBy===loggedInUser.username">
+                    <img src="./assets/icon/avatars/{{getAvatarFromNoteAuthor(note)}}.png">
+                  </ion-avatar>
+                  <ion-label *ngIf="note.createdBy===loggedInUser.username" class="ion-text-right">
+                      <h2>  {{note.createdBy}}</h2>
+                      <p> {{note.createdAt | timeAgo}}</p>
+                      <h3 class="ion-text-wrap">{{note.text}}</h3>
+                  </ion-label>
+                </ion-item>
+              </ion-list>
+            </ion-col>
+            </ion-row>
+
+            <ion-row *ngIf="notes?.length <= 0 || notes===undefined || notes===null">
+              <ion-col size-md="8" size-sm="12" size-xs="12" offset-md="2" offset-sm="0" offset-xs="0">
+                <ion-card color="warning">
+                  <ion-card-header>
+                    <ion-card-title>
+                      No notes for {{ticket.title}}
+                    </ion-card-title>
+                    <ion-label>You can add notes and mention other devs using @</ion-label>
+                  </ion-card-header>
+                </ion-card>
+              </ion-col>
+            </ion-row>
+
+
+          </ion-grid>
+
+          <ion-grid>
+            <form #noteForm="ngForm" (ngSubmit)="noteSubmit(noteForm, ticket)">
+            <ion-row class="ion-align-items-end">
+              <ion-col size="7" offset="2">
+
+                <ion-item>
+                  <ion-label position="floating">Note</ion-label>
+                  <ion-textarea #noteText  name="note" ngModel required></ion-textarea>
+                </ion-item>
+              </ion-col>
+              <ion-col size="1">
+                  <ion-button type="submit" [disabled]="!noteForm.valid" >
+                    <ion-icon name="send-outline"></ion-icon>                  
+                  </ion-button>
+              </ion-col>
+            </ion-row>
+
+
+          </form>
+          </ion-grid>  
+          
+        </ion-card-content>
+      </ion-card>    
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+</ion-content>

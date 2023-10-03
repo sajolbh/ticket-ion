@@ -1,0 +1,42 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Notifications</ion-title>
+    <ion-buttons slot="start">
+      <ion-menu-button autoHide="false"></ion-menu-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col size-md="6" size-sm="12" size-xs="12" offset-md="3" offset-sm="0" offset-xs="0" >
+        <ion-list>
+          <ion-item *ngFor="let notification of notifications">
+            <ion-label>
+              <h2 class="ion-text-wrap"> {{notification.message}}</h2>
+              <p>{{notification.createdAt | timeAgo}}</p>
+            </ion-label>
+            <ion-button (click)="deleteNotification(notification)" color="warning">
+              <ion-icon slot="icon-only" name="remove-circle-outline" ></ion-icon>              
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+
+    <ion-row *ngIf="notifications?.length <= 0 || notifications===undefined || notifications===null">
+    <ion-col size-md="6" size-sm="12" size-xs="12" offset-md="3" offset-sm="0" offset-xs="0">
+      <ion-card color="warning">
+        <ion-card-header>
+          <ion-card-title>
+            No notifications present
+          </ion-card-title>
+          <ion-label>If you have any mentions or if someone adds you to a ticket, there will be entries here</ion-label>
+        </ion-card-header>
+      </ion-card>
+    </ion-col>
+  </ion-row>
+
+  </ion-grid>
+</ion-content>
